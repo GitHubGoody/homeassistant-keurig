@@ -2,23 +2,17 @@
 from __future__ import annotations
 
 import logging
-from homeassistant.const import CONF_ACCESS_TOKEN, CONF_USERNAME
-from pykeurig.keurigapi import KeurigApi
+from homeassistant.const import CONF_USERNAME
 import homeassistant.helpers.config_validation as cv
-from typing import Any
-
-import voluptuous as vol
-
 from homeassistant import config_entries
-from homeassistant.core import HomeAssistant
 from homeassistant.data_entry_flow import FlowResult
-from homeassistant.exceptions import HomeAssistantError
-
+from pykeurig.keurigapi import KeurigApi
+from typing import Any
+import voluptuous as vol
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-# TODO adjust the data schema to the data that you need
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required("username"): str,
@@ -69,6 +63,7 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         )
 
     async def async_step_devices(self, user_input: dict[str, Any] | None = None):
+        """Handle brewer selection step."""
         if user_input is None:
             return self.async_show_form(
                 step_id="devices",

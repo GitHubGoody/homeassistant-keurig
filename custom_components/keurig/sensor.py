@@ -1,17 +1,13 @@
-from typing import Any
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import KeurigCoordinator
 from homeassistant.core import HomeAssistant, callback
 from .const import DOMAIN, MANUFACTURER
 from homeassistant.components.sensor import SensorEntity
-from pykeurig.keurigapi import KeurigApi
-from pykeurig.const import STATUS_ON
 
 
 async def async_setup_entry(hass: HomeAssistant, config, add_entities):
     coordinator: KeurigCoordinator = hass.data[DOMAIN][config.entry_id]
-    api = coordinator.api
 
     devices = await coordinator.get_devices()
 
