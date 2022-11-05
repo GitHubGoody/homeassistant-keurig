@@ -1,0 +1,304 @@
+brew_hot_water:
+  name: Brew hot water
+  description: Brew hot water
+  target:
+    device:
+      integration: keurig
+    entity:
+      integration: keurig
+  fields:
+    size:
+      name: Size
+      description: The size of the cup in ounces
+      required: true
+      selector:
+        select:
+          options:
+            - 4
+            - 6
+            - 8
+            - 10
+            - 12
+    temperature:
+      name: Temperature
+      description: The temperature of the hot water
+      required: true
+      selector:
+        select:
+          options:
+            - label: warm
+              value: 187
+            - label: warmer
+              value: 191
+            - label: hot
+              value: 194
+            - label: hotter
+              value: 197
+            - label: xhot
+              value: 200
+            - label: maxhot
+              value: 204
+
+brew_hot:
+  name: Brew hot drink
+  description: Brew a hot drink
+  target:
+    device:
+      integration: keurig
+    entity:
+      integration: keurig
+  fields:
+    size:
+      name: Size
+      description: The size of the cup in ounces
+      required: true
+      selector:
+        select:
+          options:
+            - 4
+            - 6
+            - 8
+            - 10
+            - 12
+    temperature:
+      name: Temperature
+      description: The temperature of the hot water
+      required: true
+      selector:
+        select:
+          options:
+            - label: Warm
+              value: 187
+            - label: Warmer
+              value: 191
+            - label: Hot
+              value: 194
+            - label: Hotter
+              value: 197
+            - label: Extra Hot
+              value: 200
+            - label: Maximum Hot
+              value: 204
+    intensity:
+      name: Intensity
+      description: The intensity (flow rate) of the drink
+      required: true
+      selector:
+        select:
+          options:
+            - label: Balanced
+              value: 4435
+            - label: Rich
+              value: 3942
+            - label: Robust
+              value: 3449
+            - label: Strong
+              value: 2957
+            - label: Intense
+              vale: 2464
+
+brew_iced:
+  name: Brew iced drink
+  description: Brew an iced drink
+  target:
+    device:
+      integration: keurig
+    entity:
+      integration: keurig
+
+brew_recommendation:
+  name: Brew recommendation
+  description: Brew using the recommended settings
+  target:
+    device:
+      integration: keurig
+    entity:
+      integration: keurig
+  fields:
+    size:
+      name: Size
+      description: The size of the cup in ounces
+      required: true
+      selector:
+        select:
+          options:
+            - 4
+            - 6
+            - 8
+            - 10
+            - 12
+
+brew_favorite:
+  name: Brew favorite
+  description: Brew using a favorite
+  target:
+    device:
+      integration: keurig
+    entity:
+      integration: keurig
+  fields:
+    id:
+      name: Favorite ID
+      description: Favorite ID
+      required: true
+      selector:
+        text:
+
+cancel_brew:
+  name: Cancel brew
+  description: Cancel the current brew
+  target:
+    device:
+      integration: keurig
+    entity:
+      integration: keurig
+
+add_favorite:
+  name: Add favorite
+  description: Add a new favorite
+  target:
+    device:
+      integration: keurig
+    entity:
+      integration: keurig
+  fields:
+    name:
+      name: Name
+      description: Favorite name
+      required: true
+      selector:
+        text:
+    size:
+      name: Size
+      description: The size of the cup in ounces
+      required: true
+      selector:
+        select:
+          options:
+            - 4
+            - 6
+            - 8
+            - 10
+            - 12
+    temperature:
+      name: Temperature
+      description: The temperature of the hot water
+      required: true
+      selector:
+        select:
+          options:
+            - label: Warm
+              value: 187
+            - label: Warmer
+              value: 191
+            - label: Hot
+              value: 194
+            - label: Hotter
+              value: 197
+            - label: Extra Hot
+              value: 200
+            - label: Maximum Hot
+              value: 204
+    intensity:
+      name: Intensity
+      description: The intensity (flow rate) of the drink
+      required: true
+      selector:
+        select:
+          options:
+            - label: Balanced
+              value: 4435
+            - label: Rich
+              value: 3942
+            - label: Robust
+              value: 3449
+            - label: Strong
+              value: 2957
+            - label: Intense
+              vale: 2464
+
+update_favorite:
+  name: Update favorite
+  description: Update a favorite
+  target:
+    device:
+      integration: keurig
+    entity:
+      integration: keurig
+  fields:
+    id:
+      name: Favorite ID
+      description: Favorite ID
+      required: true
+      selector:
+        text:
+    name:
+      name: Name
+      description: Favorite name
+      required: true
+      selector:
+        text:
+    size:
+      name: Size
+      description: The size of the cup in ounces
+      required: true
+      selector:
+        select:
+          options:
+            - 4
+            - 6
+            - 8
+            - 10
+            - 12
+    temperature:
+      name: Temperature
+      description: The temperature of the hot water
+      required: true
+      selector:
+        select:
+          options:
+            - label: Warm
+              value: 187
+            - label: Warmer
+              value: 191
+            - label: Hot
+              value: 194
+            - label: Hotter
+              value: 197
+            - label: Extra Hot
+              value: 200
+            - label: Maximum Hot
+              value: 204
+    intensity:
+      name: Intensity
+      description: The intensity (flow rate) of the drink
+      required: true
+      selector:
+        select:
+          options:
+            - label: Balanced
+              value: 4435
+            - label: Rich
+              value: 3942
+            - label: Robust
+              value: 3449
+            - label: Strong
+              value: 2957
+            - label: Intense
+              vale: 2464
+
+delete_favorite:
+  name: Delete favorite
+  description: delete a favorite
+  target:
+    device:
+      integration: keurig
+    entity:
+      integration: keurig
+  fields:
+    id:
+      name: Favorite ID
+      description: Favorite ID
+      required: true
+      selector:
+        text:
