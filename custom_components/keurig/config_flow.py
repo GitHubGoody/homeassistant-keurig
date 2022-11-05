@@ -77,20 +77,19 @@ class ConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
         errors = {}
 
         try:
-            await self._api.login(user_input["username"], user_input["password"])
-        except CannotConnect:
-            errors["base"] = "cannot_connect"
-        except InvalidAuth:
-            errors["base"] = "invalid_auth"
+            if not await self._api.login(
+                user_input["username"], user_input["password"]
+            ):
+                errors["base"] = "invalid_auth"
+            else:
+                self._brewers = {
+                    dev.id: dev.name for dev in await self._api.async_get_devices()
+                }
+                self.data = user_input
+                return await self.async_step_devices()
         except Exception:  # pylint: disable=broad-except
             _LOGGER.exception("Unexpected exception")
             errors["base"] = "unknown"
-        else:
-            self._brewers = {
-                dev.id: dev.name for dev in await self._api.async_get_devices()
-            }
-            self.data = user_input
-            return await self.async_step_devices()
 
         return self.async_show_form(
             step_id="user", data_schema=STEP_USER_DATA_SCHEMA, errors=errors
