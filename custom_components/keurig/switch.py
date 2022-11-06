@@ -6,6 +6,7 @@ from homeassistant.core import HomeAssistant, callback
 from .const import DOMAIN, MANUFACTURER
 from homeassistant.components.switch import SwitchEntity
 from pykeurig.const import STATUS_ON
+from pykeurig.keurigapi import UnauthorizedException
 
 
 async def async_setup_entry(hass: HomeAssistant, config, add_entities):
@@ -29,7 +30,7 @@ class KeurigSwitchEntity(SwitchEntity, CoordinatorEntity):
     def __init__(self, hass, name, device, coordinator):
         self._hass = hass
         self._device = device
-        self._coordinator = coordinator
+        self._coordinator: KeurigCoordinator = coordinator
 
         device.register_callback(self._update_data)
 
@@ -51,12 +52,18 @@ class KeurigSwitchEntity(SwitchEntity, CoordinatorEntity):
         super().__init__(coordinator)
 
     async def async_turn_on(self, **kwargs: Any) -> None:
-        await self._device.power_on()
+        try:
+            await self._device.power_on()
+        except UnauthorizedException:
+            await self._coordinator.entry.async_start_reauth()
         self._attr_is_on = True
         self.async_write_ha_state()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
-        await self._device.power_off()
+        try:
+            await self._device.power_off()
+        except UnauthorizedException:
+            await self._coordinator.entry.async_start_reauth()
         self._attr_is_on = False
         self.async_write_ha_state()
 

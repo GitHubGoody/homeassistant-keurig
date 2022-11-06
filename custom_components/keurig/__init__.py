@@ -17,7 +17,7 @@ from homeassistant.const import (
 )
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
-from pykeurig.keurigapi import KeurigApi
+from pykeurig.keurigapi import KeurigApi, UnauthorizedException
 
 from .const import (
     ATTR_SIZE,
@@ -47,7 +47,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     client = KeurigApi()
     await client.login(entry.data.get(CONF_USERNAME), entry.data.get(CONF_PASSWORD))
 
-    coordinator = KeurigCoordinator(hass, client)
+    coordinator = KeurigCoordinator(hass, client, entry)
 
     hass.data[DOMAIN][entry.entry_id] = coordinator
 
@@ -67,7 +67,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             device = next(
                 (dev for dev in await coordinator.get_devices() if dev.id == device_id)
             )
-            await device.hot_water(int(size), int(temperature))
+            try:
+                await device.hot_water(int(size), int(temperature))
+            except UnauthorizedException:
+                await entry.async_start_reauth()
 
     hass.services.async_register(DOMAIN, SERVICE_BREW_HOT_WATER, handle_brew_hot_water)
 
@@ -85,7 +88,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             device = next(
                 (dev for dev in await coordinator.get_devices() if dev.id == device_id)
             )
-            await device.brew_hot(int(size), int(temperature), int(intensity))
+            try:
+                await device.brew_hot(int(size), int(temperature), int(intensity))
+            except UnauthorizedException:
+                await entry.async_start_reauth()
 
     hass.services.async_register(DOMAIN, SERVICE_BREW_HOT, handle_brew_hot)
 
@@ -100,7 +106,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             device = next(
                 (dev for dev in await coordinator.get_devices() if dev.id == device_id)
             )
-            await device.brew_iced()
+            try:
+                await device.brew_iced()
+            except UnauthorizedException:
+                await entry.async_start_reauth()
 
     hass.services.async_register(DOMAIN, SERVICE_BREW_ICED, handle_brew_iced)
 
@@ -116,7 +125,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             device = next(
                 (dev for dev in await coordinator.get_devices() if dev.id == device_id)
             )
-            await device.brew_hot(int(size))
+            try:
+                await device.brew_hot(int(size))
+            except UnauthorizedException:
+                await entry.async_start_reauth()
 
     hass.services.async_register(
         DOMAIN, SERVICE_BREW_RECOMMENDATION, handle_brew_recommendation
@@ -134,7 +146,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             device = next(
                 (dev for dev in await coordinator.get_devices() if dev.id == device_id)
             )
-            await device.brew_favorite(favorite_id)
+            try:
+                await device.brew_favorite(favorite_id)
+            except UnauthorizedException:
+                await entry.async_start_reauth()
 
     hass.services.async_register(DOMAIN, SERVICE_BREW_FAVORITE, handle_brew_favorite)
 
@@ -149,7 +164,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             device = next(
                 (dev for dev in await coordinator.get_devices() if dev.id == device_id)
             )
-            await device.cancel_brew()
+            try:
+                await device.cancel_brew()
+            except UnauthorizedException:
+                await entry.async_start_reauth()
 
     hass.services.async_register(DOMAIN, SERVICE_CANCEL_BREW, handle_cancel_brew)
 
@@ -168,7 +186,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             device = next(
                 (dev for dev in await coordinator.get_devices() if dev.id == device_id)
             )
-            await device.add_favorite(name, int(size), int(temperature), int(intensity))
+            try:
+                await device.add_favorite(
+                    name, int(size), int(temperature), int(intensity)
+                )
+            except UnauthorizedException:
+                await entry.async_start_reauth()
 
     hass.services.async_register(DOMAIN, SERVICE_ADD_FAVORITE, handle_add_favorite)
 
@@ -188,9 +211,12 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             device = next(
                 (dev for dev in await coordinator.get_devices() if dev.id == device_id)
             )
-            await device.update_favorite(
-                favorite_id, name, int(size), int(temperature), int(intensity)
-            )
+            try:
+                await device.update_favorite(
+                    favorite_id, name, int(size), int(temperature), int(intensity)
+                )
+            except UnauthorizedException:
+                await entry.async_start_reauth()
 
     hass.services.async_register(
         DOMAIN, SERVICE_UPDATE_FAVORITE, handle_update_favorite
@@ -208,7 +234,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             device = next(
                 (dev for dev in await coordinator.get_devices() if dev.id == device_id)
             )
-            await device.delete_favorite(favorite_id)
+            try:
+                await device.delete_favorite(favorite_id)
+            except UnauthorizedException:
+                await entry.async_start_reauth()
 
     hass.services.async_register(
         DOMAIN, SERVICE_DELETE_FAVORITE, handle_delete_favorite
@@ -228,7 +257,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 class KeurigCoordinator(DataUpdateCoordinator):
     """My custom coordinator."""
 
-    def __init__(self, hass, api, devices=None):
+    def __init__(
+        self, hass: HomeAssistant, api: KeurigApi, entry: ConfigEntry, devices=None
+    ):
         """Initialize my coordinator."""
         super().__init__(
             hass,
@@ -238,13 +269,17 @@ class KeurigCoordinator(DataUpdateCoordinator):
         )
         self.api = api
         self.hass: HomeAssistant = hass
+        self.entry = entry
         self._devices = None
         self._device_lock = asyncio.Lock()
 
     async def get_devices(self):
         async with self._device_lock:
             if self._devices is None:
-                self._devices = await self.api.async_get_devices()
+                try:
+                    self._devices = await self.api.async_get_devices()
+                except UnauthorizedException:
+                    await self.entry.async_start_reauth()
             return self._devices
 
     async def _async_update_data(self):
