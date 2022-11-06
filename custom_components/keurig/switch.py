@@ -55,7 +55,7 @@ class KeurigSwitchEntity(SwitchEntity, CoordinatorEntity):
         try:
             await self._device.power_on()
         except UnauthorizedException:
-            await self._coordinator.entry.async_start_reauth()
+            await self._coordinator.entry.async_start_reauth(self._hass)
         self._attr_is_on = True
         self.async_write_ha_state()
 
@@ -63,7 +63,7 @@ class KeurigSwitchEntity(SwitchEntity, CoordinatorEntity):
         try:
             await self._device.power_off()
         except UnauthorizedException:
-            await self._coordinator.entry.async_start_reauth()
+            await self._coordinator.entry.async_start_reauth(self._hass)
         self._attr_is_on = False
         self.async_write_ha_state()
 

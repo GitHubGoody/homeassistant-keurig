@@ -70,7 +70,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             try:
                 await device.hot_water(int(size), int(temperature))
             except UnauthorizedException:
-                await entry.async_start_reauth()
+                await entry.async_start_reauth(hass)
 
     hass.services.async_register(DOMAIN, SERVICE_BREW_HOT_WATER, handle_brew_hot_water)
 
@@ -91,7 +91,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             try:
                 await device.brew_hot(int(size), int(temperature), int(intensity))
             except UnauthorizedException:
-                await entry.async_start_reauth()
+                await entry.async_start_reauth(hass)
 
     hass.services.async_register(DOMAIN, SERVICE_BREW_HOT, handle_brew_hot)
 
@@ -109,7 +109,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             try:
                 await device.brew_iced()
             except UnauthorizedException:
-                await entry.async_start_reauth()
+                await entry.async_start_reauth(hass)
 
     hass.services.async_register(DOMAIN, SERVICE_BREW_ICED, handle_brew_iced)
 
@@ -128,7 +128,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             try:
                 await device.brew_hot(int(size))
             except UnauthorizedException:
-                await entry.async_start_reauth()
+                await entry.async_start_reauth(hass)
 
     hass.services.async_register(
         DOMAIN, SERVICE_BREW_RECOMMENDATION, handle_brew_recommendation
@@ -149,7 +149,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             try:
                 await device.brew_favorite(favorite_id)
             except UnauthorizedException:
-                await entry.async_start_reauth()
+                await entry.async_start_reauth(hass)
 
     hass.services.async_register(DOMAIN, SERVICE_BREW_FAVORITE, handle_brew_favorite)
 
@@ -167,7 +167,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             try:
                 await device.cancel_brew()
             except UnauthorizedException:
-                await entry.async_start_reauth()
+                await entry.async_start_reauth(hass)
 
     hass.services.async_register(DOMAIN, SERVICE_CANCEL_BREW, handle_cancel_brew)
 
@@ -191,7 +191,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     name, int(size), int(temperature), int(intensity)
                 )
             except UnauthorizedException:
-                await entry.async_start_reauth()
+                await entry.async_start_reauth(hass)
 
     hass.services.async_register(DOMAIN, SERVICE_ADD_FAVORITE, handle_add_favorite)
 
@@ -216,7 +216,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                     favorite_id, name, int(size), int(temperature), int(intensity)
                 )
             except UnauthorizedException:
-                await entry.async_start_reauth()
+                await entry.async_start_reauth(hass)
 
     hass.services.async_register(
         DOMAIN, SERVICE_UPDATE_FAVORITE, handle_update_favorite
@@ -237,7 +237,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
             try:
                 await device.delete_favorite(favorite_id)
             except UnauthorizedException:
-                await entry.async_start_reauth()
+                await entry.async_start_reauth(hass)
 
     hass.services.async_register(
         DOMAIN, SERVICE_DELETE_FAVORITE, handle_delete_favorite
@@ -279,7 +279,7 @@ class KeurigCoordinator(DataUpdateCoordinator):
                 try:
                     self._devices = await self.api.async_get_devices()
                 except UnauthorizedException:
-                    await self.entry.async_start_reauth()
+                    await self.entry.async_start_reauth(self.hass)
             return self._devices
 
     async def _async_update_data(self):
