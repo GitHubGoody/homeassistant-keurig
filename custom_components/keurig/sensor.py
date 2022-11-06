@@ -98,10 +98,12 @@ class KeurigSensorEntity(SensorEntity, CoordinatorEntity):
             elif error_value == "PM_NOT_CYCLED":
                 return "pod not removed"
             else:
-                return "not ready"
+                return error_value if error_value is not None else value
         elif value == "BREW_CANCELING":
             return "canceling"
-        elif value == "BREWER_STATUS_BREWING":
+        elif value == "BREW_IN_PROGRESS":
             return "brewing"
         elif value == "BREW_SUCCESSFUL":
             return "complete"
+        else:
+            return value
