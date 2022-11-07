@@ -126,7 +126,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
                 (dev for dev in await coordinator.get_devices() if dev.id == device_id)
             )
             try:
-                await device.brew_hot(int(size))
+                await device.brew_recommendation(int(size))
             except UnauthorizedException:
                 await entry.async_start_reauth(hass)
 
