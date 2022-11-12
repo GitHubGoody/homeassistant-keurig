@@ -56,7 +56,7 @@ class KeurigSensorEntity(SensorEntity, CoordinatorEntity):
             self._attr_native_value = self.__pod_status_string(self._device.pod_status)
         elif self._device_type == "brewer_status":
             self._attr_native_value = self.__brewer_status_string(
-                self._device.brewer_status, self._device.brewer_error
+                self._device.brewer_status, self._device.errors
             )
 
         self._attr_device_info = DeviceInfo(
@@ -75,30 +75,32 @@ class KeurigSensorEntity(SensorEntity, CoordinatorEntity):
             self._attr_native_value = self.__pod_status_string(self._device.pod_status)
         elif self._device_type == "brewer_status":
             self._attr_native_value = self.__brewer_status_string(
-                self._device.brewer_status, self._device.brewer_error
+                self._device.brewer_status, self._device.errors
             )
         self.schedule_update_ha_state(False)
 
-    def __pod_status_string(self, value):
+    def __pod_status_string(self, value: str):
         if value == "EMPTY":
             return "empty"
         elif value == "PUNCHED":
             return "used"
         elif value == "POD":
             return "present"
+        else:
+            return value
 
-    def __brewer_status_string(self, value, error_value):
+    def __brewer_status_string(self, value: str, errors: list):
         if value == "BREW_READY":
             return "ready"
         elif value == "BREW_LOCKED":
-            if error_value == "PM_NOT_READY":
-                return "lid open"
-            elif error_value == "BREW_INSUFFICIENT_WATER" or error_value == "ADD_WATER":
+            if "ADD_WATER" in errors or "BREW_INSUFFICIENT_WATER" in errors:
                 return "no water"
-            elif error_value == "PM_NOT_CYCLED":
+            elif "PM_NOT_CYCLED" in errors:
                 return "pod not removed"
+            elif "PM_NOT_READY" in errors:
+                return "lid open"
             else:
-                return error_value if error_value is not None else value
+                return errors if errors is not None else value
         elif value == "BREW_CANCELING":
             return "canceling"
         elif value == "BREW_IN_PROGRESS":
