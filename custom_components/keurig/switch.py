@@ -5,7 +5,7 @@ from . import KeurigCoordinator
 from homeassistant.core import HomeAssistant, callback
 from .const import DOMAIN, MANUFACTURER
 from homeassistant.components.switch import SwitchEntity
-from pykeurig.const import STATUS_ON
+from pykeurig.const import STATUS_ON, STATUS_BREWING
 from pykeurig.keurigapi import UnauthorizedException
 
 
@@ -39,7 +39,7 @@ class KeurigSwitchEntity(SwitchEntity, CoordinatorEntity):
         self._attr_has_entity_name = True
 
         self._attr_unique_id = device.id + "_power"
-        self._attr_is_on = self._device.appliance_status == STATUS_ON
+        self._attr_is_on = self._device.appliance_status == STATUS_ON or self._device.appliance_status == STATUS_BREWING
 
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, device.id)},
@@ -69,5 +69,5 @@ class KeurigSwitchEntity(SwitchEntity, CoordinatorEntity):
 
     @callback
     def _update_data(self, args):
-        self._attr_is_on = self._device.appliance_status == STATUS_ON
+        self._attr_is_on = self._device.appliance_status == STATUS_ON or self._device.appliance_status == STATUS_BREWING
         self.schedule_update_ha_state(False)
