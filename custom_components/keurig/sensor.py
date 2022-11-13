@@ -2,7 +2,7 @@ from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import KeurigCoordinator
 from homeassistant.core import HomeAssistant, callback
-from .const import DOMAIN, MANUFACTURER
+from .const import ATTR_POD_BRAND, ATTR_POD_IS_FLAVORED, ATTR_POD_IS_ICED, ATTR_POD_IS_POWDERED, ATTR_POD_IS_TEA, ATTR_POD_ROAST_TYPE, ATTR_POD_VARIETY, DOMAIN, MANUFACTURER
 from homeassistant.components.sensor import SensorEntity
 
 
@@ -54,6 +54,15 @@ class KeurigSensorEntity(SensorEntity, CoordinatorEntity):
 
         if self._device_type == "pod_status":
             self._attr_native_value = self.__pod_status_string(self._device.pod_status)
+            self._attr_extra_state_attributes = {
+                ATTR_POD_BRAND: self._device.pod_brand,
+                ATTR_POD_VARIETY: self._device.pod_variety,
+                ATTR_POD_ROAST_TYPE: self._device.pod_roast_type,
+                ATTR_POD_IS_TEA: self._device.pod_is_tea,
+                ATTR_POD_IS_ICED: self._device.pod_is_iced,
+                ATTR_POD_IS_FLAVORED: self._device.pod_is_flavored,
+                ATTR_POD_IS_POWDERED: self._device.pod_is_powdered,
+            }
         elif self._device_type == "brewer_status":
             self._attr_native_value = self.__brewer_status_string(
                 self._device.brewer_status, self._device.errors
@@ -73,6 +82,15 @@ class KeurigSensorEntity(SensorEntity, CoordinatorEntity):
     def _update_data(self, args):
         if self._device_type == "pod_status":
             self._attr_native_value = self.__pod_status_string(self._device.pod_status)
+            self._attr_extra_state_attributes = {
+                ATTR_POD_BRAND: self._device.pod_brand,
+                ATTR_POD_VARIETY: self._device.pod_variety,
+                ATTR_POD_ROAST_TYPE: self._device.pod_roast_type,
+                ATTR_POD_IS_TEA: self._device.pod_is_tea,
+                ATTR_POD_IS_ICED: self._device.pod_is_iced,
+                ATTR_POD_IS_FLAVORED: self._device.pod_is_flavored,
+                ATTR_POD_IS_POWDERED: self._device.pod_is_powdered,
+            }
         elif self._device_type == "brewer_status":
             self._attr_native_value = self.__brewer_status_string(
                 self._device.brewer_status, self._device.errors
