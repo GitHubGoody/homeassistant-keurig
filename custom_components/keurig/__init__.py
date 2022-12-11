@@ -1,7 +1,14 @@
 """The Keurig Connect integration."""
 from __future__ import annotations
 import asyncio
-from .helpers import get_brewers_for_service
+from io import BytesIO
+from aiohttp import web
+from PIL import Image
+from httpx import HTTPStatusError
+
+from homeassistant.components.http.view import HomeAssistantView
+from homeassistant.helpers import device_registry, entity_registry
+from .helpers import get_brewers_by_entity_id, get_brewers_for_service
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import (
@@ -20,6 +27,8 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 from pykeurig.keurigapi import KeurigApi, UnauthorizedException
 
 from .const import (
+    ATTR_POD_BRAND,
+    ATTR_POD_VARIETY,
     ATTR_SIZE,
     DOMAIN,
     SERVICE_ADD_FAVORITE,
@@ -243,6 +252,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         DOMAIN, SERVICE_DELETE_FAVORITE, handle_delete_favorite
     )
 
+    hass.http.register_view(ApiBrandView(hass, coordinator, client))
+    hass.http.register_view(ApiVarietyView(hass, coordinator, client))
+
     return True
 
 
@@ -284,3 +296,104 @@ class KeurigCoordinator(DataUpdateCoordinator):
 
     async def _async_update_data(self):
         await self.hass.async_add_executor_job(self.api.connect)
+
+
+class KeurigView(HomeAssistantView):
+    def __init__(self, hass, coordinator, api):
+        """Initialize."""
+        self.requires_auth = False
+        self._api = api
+        self.hass = hass
+        self._coordinator = coordinator
+
+    async def _get_device_by_entity_id(self, entity_id):
+        device_ids = get_brewers_by_entity_id(
+            self.hass,
+            device_registry.async_get(self.hass),
+            entity_registry.async_get(self.hass),
+            [entity_id],
+            [],
+        )
+        if len(device_ids) > 0:
+            return next(
+                (
+                    dev
+                    for dev in await self._coordinator.get_devices()
+                    if dev.id == device_ids[0]
+                )
+            )
+        else:
+            return None
+
+
+class ApiBrandView(KeurigView):
+    def __init__(self, hass, coordinator, api):
+        """Initialize."""
+        self.url = "/api/keurig_brand_proxy/{entity_id}"
+        self.name = "api:keurig:brand"
+        super().__init__(hass, coordinator, api)
+
+    async def get(self, request, entity_id: str):  # pylint: disable=unused-argument
+        """Handle HACS Web requests."""
+
+        device = await self._get_device_by_entity_id(entity_id)
+
+        if device is None:
+            return web.Response(status=404)
+
+        if ATTR_POD_BRAND not in self.hass.states.get(entity_id).attributes:
+            return web.Response(status=400)
+
+        brand_id = device.pod_brand_id
+        if brand_id is None:
+            img = Image.new(mode="RGBA", size=(470, 320))
+            default_image_stream = BytesIO()
+            img.save(default_image_stream, "PNG")
+            return web.Response(
+                body=default_image_stream.getvalue(), content_type="image/png"
+            )
+        image_bytes = None
+        try:
+            image_bytes = await self._api.async_get_brand_image(brand_id)
+        except HTTPStatusError as err:
+            return web.Response(status=err.response.status_code)
+        stream = BytesIO(image_bytes)
+
+        return web.Response(body=stream.getvalue(), content_type="image/png")
+
+
+class ApiVarietyView(KeurigView):
+    def __init__(self, hass, coordinator, api):
+        """Initialize."""
+        self.url = "/api/keurig_variety_proxy/{entity_id}"
+        self.name = "api:keurig:variety"
+
+        super().__init__(hass, coordinator, api)
+
+    async def get(self, request, entity_id: str):  # pylint: disable=unused-argument
+        """Handle HACS Web requests."""
+
+        device = await self._get_device_by_entity_id(entity_id)
+
+        if device is None:
+            return web.Response(status=404)
+
+        if ATTR_POD_VARIETY not in self.hass.states.get(entity_id).attributes:
+            return web.Response(status=400)
+
+        variety_id = device.pod_variety_id
+        if variety_id is None:
+            img = Image.new(mode="RGBA", size=(2000, 2000))
+            default_image_stream = BytesIO()
+            img.save(default_image_stream, "PNG")
+            return web.Response(
+                body=default_image_stream.getvalue(), content_type="image/png"
+            )
+        image_bytes = None
+        try:
+            image_bytes = await self._api.async_get_variety_image(variety_id)
+        except HTTPStatusError as err:
+            return web.Response(status=err.response.status_code)
+        stream = BytesIO(image_bytes)
+
+        return web.Response(body=stream.getvalue(), content_type="image/png")

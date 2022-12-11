@@ -80,11 +80,12 @@ def get_brewers_by_entity_id(
 ):
     for entity_id in entity_ids:
         entity = entity_reg.async_get(entity_id)
-        [
-            matched_devices.append(x)
-            for x in get_brewers_by_device_id(hass, device_reg, [entity.device_id])
-            if x not in matched_devices
-        ]
+        if entity is not None:
+            [
+                matched_devices.append(x)
+                for x in get_brewers_by_device_id(hass, device_reg, [entity.device_id])
+                if x not in matched_devices
+            ]
     return matched_devices
 
 
