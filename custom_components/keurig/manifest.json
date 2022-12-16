@@ -1,0 +1,18 @@
+{
+  "domain": "keurig",
+  "name": "Keurig Connect",
+  "version": "0.0.1",
+  "config_flow": true,
+  "documentation": "https://www.home-assistant.io/integrations/keurig",
+  "requirements": [
+    "pykeurig==1.0"
+  ],
+  "ssdp": [],
+  "zeroconf": [],
+  "homekit": {},
+  "dependencies": [],
+  "codeowners": [
+    "@dcmeglio"
+  ],
+  "iot_class": "cloud_push"
+}
