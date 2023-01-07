@@ -1,4 +1,5 @@
 from typing import Any
+from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import KeurigCoordinator
@@ -11,8 +12,11 @@ from pykeurig.keurigapi import UnauthorizedException
 
 async def async_setup_entry(hass: HomeAssistant, config, add_entities):
     coordinator: KeurigCoordinator = hass.data[DOMAIN][config.entry_id]
-
-    devices = await coordinator.get_devices()
+    devices = None
+    try:
+        devices = await coordinator.get_devices()
+    except Exception as ex:
+        raise ConfigEntryNotReady("Failed to retrieve Keurig devices")
 
     entities = []
     for brewer in devices:
@@ -39,7 +43,10 @@ class KeurigSwitchEntity(SwitchEntity, CoordinatorEntity):
         self._attr_has_entity_name = True
 
         self._attr_unique_id = device.id + "_power"
-        self._attr_is_on = self._device.appliance_status == STATUS_ON or self._device.appliance_status == STATUS_BREWING
+        self._attr_is_on = (
+            self._device.appliance_status == STATUS_ON
+            or self._device.appliance_status == STATUS_BREWING
+        )
 
         self._attr_device_info = DeviceInfo(
             identifiers={(DOMAIN, device.id)},
@@ -69,5 +76,8 @@ class KeurigSwitchEntity(SwitchEntity, CoordinatorEntity):
 
     @callback
     def _update_data(self, args):
-        self._attr_is_on = self._device.appliance_status == STATUS_ON or self._device.appliance_status == STATUS_BREWING
+        self._attr_is_on = (
+            self._device.appliance_status == STATUS_ON
+            or self._device.appliance_status == STATUS_BREWING
+        )
         self.schedule_update_ha_state(False)

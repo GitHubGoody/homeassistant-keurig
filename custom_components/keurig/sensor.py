@@ -1,15 +1,30 @@
+from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.entity import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from . import KeurigCoordinator
 from homeassistant.core import HomeAssistant, callback
-from .const import ATTR_POD_BRAND, ATTR_POD_IS_FLAVORED, ATTR_POD_IS_ICED, ATTR_POD_IS_POWDERED, ATTR_POD_IS_TEA, ATTR_POD_ROAST_TYPE, ATTR_POD_VARIETY, DOMAIN, MANUFACTURER
+from .const import (
+    ATTR_POD_BRAND,
+    ATTR_POD_IS_FLAVORED,
+    ATTR_POD_IS_ICED,
+    ATTR_POD_IS_POWDERED,
+    ATTR_POD_IS_TEA,
+    ATTR_POD_ROAST_TYPE,
+    ATTR_POD_VARIETY,
+    DOMAIN,
+    MANUFACTURER,
+)
 from homeassistant.components.sensor import SensorEntity
 
 
 async def async_setup_entry(hass: HomeAssistant, config, add_entities):
     coordinator: KeurigCoordinator = hass.data[DOMAIN][config.entry_id]
 
-    devices = await coordinator.get_devices()
+    devices = None
+    try:
+        devices = await coordinator.get_devices()
+    except Exception as ex:
+        raise ConfigEntryNotReady("Failed to retrieve Keurig devices") from ex
 
     entities = []
     for brewer in devices:
