@@ -93,6 +93,9 @@ class KeurigSensorEntity(SensorEntity, CoordinatorEntity):
 
         super().__init__(coordinator)
 
+    async def async_will_remove_from_hass(self) -> None:
+        self._device.unregister_callback(self._update_data)
+
     @callback
     def _update_data(self, args):
         if self._device_type == "pod_status":

@@ -58,6 +58,9 @@ class KeurigSwitchEntity(SwitchEntity, CoordinatorEntity):
 
         super().__init__(coordinator)
 
+    async def async_will_remove_from_hass(self) -> None:
+        self._device.unregister_callback(self._update_data)
+
     async def async_turn_on(self, **kwargs: Any) -> None:
         try:
             await self._device.power_on()

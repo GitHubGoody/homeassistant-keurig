@@ -1,11 +1,11 @@
 {
   "domain": "keurig",
   "name": "Keurig Connect",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "config_flow": true,
   "documentation": "https://www.home-assistant.io/integrations/keurig",
   "requirements": [
-    "pykeurig==1.1.2"
+    "pykeurig==1.2.0"
   ],
   "ssdp": [],
   "zeroconf": [],
