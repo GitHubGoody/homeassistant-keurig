@@ -122,6 +122,8 @@ class KeurigSensorEntity(SensorEntity, CoordinatorEntity):
             return "used"
         elif value == "POD":
             return "present"
+        elif value == "BAD_IMAGE":
+            return "bad image"
         else:
             return value
 
