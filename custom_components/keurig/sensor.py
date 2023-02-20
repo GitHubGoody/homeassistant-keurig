@@ -65,8 +65,6 @@ class KeurigSensorEntity(SensorEntity, CoordinatorEntity):
         self._attr_unique_id = device.id + "_" + device_type
         self._attr_icon = "mdi:coffee-maker"
 
-        device.register_callback(self._update_data)
-
         if self._device_type == "pod_status":
             self._attr_native_value = self.__pod_status_string(self._device.pod_status)
             self._attr_extra_state_attributes = {
@@ -93,8 +91,8 @@ class KeurigSensorEntity(SensorEntity, CoordinatorEntity):
 
         super().__init__(coordinator)
 
-    async def async_will_remove_from_hass(self) -> None:
-        self._device.unregister_callback(self._update_data)
+    async def async_added_to_hass(self) -> None:
+        self.async_on_remove(self._device.register_callback(self._update_data))
 
     @callback
     def _update_data(self, args):
