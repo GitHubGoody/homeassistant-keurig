@@ -1,6 +1,6 @@
 # homeassistant-keurig
 
-[Keurig] has a [line of SMART Coffee Brewers](https://www.keurig.com/lp/smart-family). This integration utilizes the Keurig API to bring the brewer and its available entities into Home Assistant.
+Keurig has a [line of SMART Coffee Brewers](https://www.keurig.com/lp/smart-family). This integration utilizes the Keurig API to bring the brewer and its available entities into Home Assistant.
 
 The currently supported brewers are:
 
