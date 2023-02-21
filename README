@@ -27,7 +27,7 @@ The currently supported brewers are:
 4. Navigate to Setting > Device & Services > Integration and click ADD INTEGRATION. If the integration does not show up, refresh the Integrations page.
 5. Configure the integration by providing your Keurig username and password.
 
-When configured, the Keurig integration will automatically discover the currently supported devices as set up in the Keurig native app. The generic device id (e.g. 'k29') will initially be used for the device name and entity id's, but can be changed as necessary after initial configuration. 
+When configured, the Keurig integration will automatically discover the currently supported devices as configured in the Keurig native app. The generic device id (e.g. 'k29') will initially be used for the device name and entity id's, but can be changed as necessary after initial configuration. 
 
 ## Known states
 <div class='note'>
