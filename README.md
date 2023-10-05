@@ -12,7 +12,7 @@ The currently supported brewers are:
 ### [HACS](https://github.com/hacs/integration) (Recommended)
 1. Navigate to HACS > Integrations
 2. Click the three dots ⋮ in the top-right corner and select Custom repositories
-3. Copy/paste https://github.com/dcmeglio/homeassistant-keurig into the Repository field
+3. Copy/paste https://github.com/GitHubGoody/homeassistant-keurig into the Repository field
 4. Select Integration as the Category and click ADD
 5. Select the newly added Keurig repository and click DOWNLOAD
 6. Click Integrations then click the + in the lower right corner and type in Mail and Packages
